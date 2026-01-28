@@ -1,0 +1,32 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  # Go formatting
+  - repo: https://github.com/tekwizely/pre-commit-golang
+    rev: v1.0.0-rc.4
+    hooks:
+      - id: go-fmt
+        args: [-w]
+
+  # Go linting with golangci-lint v2 (includes formatters: gofmt, goimports)
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v2.8.0
+    hooks:
+      - id: golangci-lint
+        args: [--config=.golangci.yml, --fix]
+
+  # Gitleaks - Secret scanning
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
+
+  # Trivy - Security scanning for filesystem
+  - repo: local
+    hooks:
+      - id: trivy-fs
+        name: Trivy filesystem scan
+        entry: trivy fs --exit-code 1 --severity HIGH,CRITICAL --scanners vuln,misconfig,secret .
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]

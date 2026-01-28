@@ -1,4 +1,4 @@
-.PHONY: build test lint clean install run fmt tidy coverage
+.PHONY: build test lint clean install run fmt tidy coverage setup pre-commit
 
 # Build variables
 BINARY_NAME=azswitch
@@ -69,6 +69,14 @@ clean:
 dev:
 	air
 
+# Setup pre-commit hooks
+setup:
+	pre-commit install
+
+# Run pre-commit on all files
+pre-commit:
+	pre-commit run --all-files
+
 # Help
 help:
 	@echo "Available targets:"
@@ -83,3 +91,5 @@ help:
 	@echo "  run        - Build and run"
 	@echo "  clean      - Remove build artifacts"
 	@echo "  dev        - Run with live reload (requires air)"
+	@echo "  setup      - Install pre-commit hooks"
+	@echo "  pre-commit - Run pre-commit on all files"
