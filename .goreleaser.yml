@@ -70,6 +70,22 @@ changelog:
       - '^chore:'
       - '^ci:'
 
+brews:
+  - name: azswitch
+    repository:
+      owner: l2D
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/l2D/azswitch"
+    description: "Switch Azure Directory and Subscription with command and TUI"
+    license: "MIT"
+    install: |
+      bin.install "azswitch"
+    test: |
+      system "#{bin}/azswitch", "--version"
+    commit_msg_template: "chore(formula): update {{ .ProjectName }} to version {{ .Tag }}"
+
 release:
   github:
     owner: l2D

@@ -47,8 +47,25 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Check for Git tag
+        id: check_tag
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "TAG_PRESENT=true" >> $GITHUB_OUTPUT
+            echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+            if [[ -n "$LATEST_TAG" ]]; then
+              echo "TAG_PRESENT=false" >> $GITHUB_OUTPUT
+              echo "TAG_NAME=$LATEST_TAG" >> $GITHUB_OUTPUT
+            else
+              echo "TAG_PRESENT=false" >> $GITHUB_OUTPUT
+              echo "TAG_NAME=v0.0.0" >> $GITHUB_OUTPUT
+            fi
+          fi
+
       - name: Login to GitHub Container Registry
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && inputs.dry_run == false)
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -64,9 +81,21 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+      - name: Run GoReleaser (Manual Release)
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run == false
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: release --clean ${{ steps.check_tag.outputs.TAG_PRESENT == 'false' && '--snapshot' || '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
 
       - name: Run GoReleaser (Dry Run)
-        if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.dry_run)
+        if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.dry_run == true)
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
