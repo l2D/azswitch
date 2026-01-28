@@ -3,6 +3,7 @@ package tui
 import (
 	"context"
 	"fmt"
+	"os/exec"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/help"
@@ -289,15 +290,15 @@ func (m Model) switchSubscription(id string) tea.Cmd {
 	}
 }
 
-// switchTenant switches to the specified tenant.
+// switchTenant switches to the specified tenant using interactive login.
 func (m Model) switchTenant(id string) tea.Cmd {
-	return func() tea.Msg {
-		ctx := context.Background()
-		if err := m.client.LoginToTenant(ctx, id); err != nil {
+	cmd := exec.Command("az", "login", "--tenant", id)
+	return tea.ExecProcess(cmd, func(err error) tea.Msg {
+		if err != nil {
 			return errMsg{err}
 		}
-		return switchedMsg{message: "Tenant switched successfully"}
-	}
+		return switchedMsg{message: "Directory switched successfully"}
+	})
 }
 
 // View renders the UI.
