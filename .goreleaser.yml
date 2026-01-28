@@ -1,0 +1,127 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: azswitch
+    main: ./cmd/azswitch
+    binary: azswitch
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X github.com/l2D/azswitch/internal/version.Version={{.Version}}
+      - -X github.com/l2D/azswitch/internal/version.CommitSHA={{.Commit}}
+      - -X github.com/l2D/azswitch/internal/version.BuildTime={{.Date}}
+
+archives:
+  - id: default
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: '{{ incpatch .Version }}-next'
+
+changelog:
+  sort: desc
+  use: github
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: Bug Fixes
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: Performance Improvements
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: Documentation
+      regexp: '^.*?docs(\([[:word:]]+\))??!?:.+$'
+      order: 3
+    - title: Others
+      order: 999
+  filters:
+    exclude:
+      - '^style:'
+      - '^chore:'
+      - '^ci:'
+
+release:
+  github:
+    owner: l2D
+    name: azswitch
+  draft: false
+  prerelease: auto
+  footer: |
+    ## Docker Image
+    ```
+    docker pull ghcr.io/l2d/azswitch:{{ .Tag }}
+    ```
+    
+    ## Quick Install
+    ```bash
+    # Go install
+    go install github.com/l2D/azswitch/cmd/azswitch@{{ .Tag }}
+    ```
+
+dockers:
+  - image_templates:
+      - 'ghcr.io/l2d/azswitch:{{ .Tag }}-amd64'
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - '--pull'
+      - '--platform=linux/amd64'
+      - '--label=org.opencontainers.image.created={{.Date}}'
+      - '--label=org.opencontainers.image.title={{.ProjectName}}'
+      - '--label=org.opencontainers.image.revision={{.FullCommit}}'
+      - '--label=org.opencontainers.image.version={{.Version}}'
+      - '--label=org.opencontainers.image.source={{.GitURL}}'
+    goarch: amd64
+
+  - image_templates:
+      - 'ghcr.io/l2d/azswitch:{{ .Tag }}-arm64'
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - '--pull'
+      - '--platform=linux/arm64'
+      - '--label=org.opencontainers.image.created={{.Date}}'
+      - '--label=org.opencontainers.image.title={{.ProjectName}}'
+      - '--label=org.opencontainers.image.revision={{.FullCommit}}'
+      - '--label=org.opencontainers.image.version={{.Version}}'
+      - '--label=org.opencontainers.image.source={{.GitURL}}'
+    goarch: arm64
+
+docker_manifests:
+  - name_template: 'ghcr.io/l2d/azswitch:{{ .Tag }}'
+    image_templates:
+      - 'ghcr.io/l2d/azswitch:{{ .Tag }}-amd64'
+      - 'ghcr.io/l2d/azswitch:{{ .Tag }}-arm64'
+
+  - name_template: 'ghcr.io/l2d/azswitch:latest'
+    image_templates:
+      - 'ghcr.io/l2d/azswitch:{{ .Tag }}-amd64'
+      - 'ghcr.io/l2d/azswitch:{{ .Tag }}-arm64'
