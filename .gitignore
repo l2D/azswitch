@@ -1,18 +1,12 @@
-# Binaries
-azswitch
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
+# Build output
+/bin/
 /dist/
 
 # Test binary
 *.test
 
-# Output of go coverage
-*.out
-coverage.html
+# Coverage reports
+/coverage/
 
 # Dependency directories
 vendor/

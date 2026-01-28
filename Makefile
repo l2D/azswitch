@@ -20,10 +20,12 @@ all: lint test build
 
 # Build the binary
 build:
-	$(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME) ./cmd/azswitch
+	@mkdir -p bin
+	$(GOBUILD) $(LDFLAGS) -o bin/$(BINARY_NAME) ./cmd/azswitch
 
 # Build for all platforms
 build-all:
+	@mkdir -p dist
 	GOOS=darwin GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o dist/$(BINARY_NAME)-darwin-amd64 ./cmd/azswitch
 	GOOS=darwin GOARCH=arm64 $(GOBUILD) $(LDFLAGS) -o dist/$(BINARY_NAME)-darwin-arm64 ./cmd/azswitch
 	GOOS=linux GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o dist/$(BINARY_NAME)-linux-amd64 ./cmd/azswitch
@@ -36,8 +38,9 @@ test:
 
 # Run tests with coverage
 coverage:
-	$(GOTEST) -v -race -coverprofile=coverage.out -covermode=atomic ./...
-	$(GOCMD) tool cover -html=coverage.out -o coverage.html
+	@mkdir -p coverage
+	$(GOTEST) -v -race -coverprofile=coverage/coverage.out -covermode=atomic ./...
+	$(GOCMD) tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 # Run linter
 lint:
@@ -53,17 +56,17 @@ tidy:
 
 # Install the binary
 install: build
-	cp $(BINARY_NAME) $(GOPATH)/bin/
+	cp bin/$(BINARY_NAME) $(GOPATH)/bin/
 
 # Run the application
 run: build
-	./$(BINARY_NAME)
+	./bin/$(BINARY_NAME)
 
 # Clean build artifacts
 clean:
-	rm -f $(BINARY_NAME)
+	rm -rf bin/
 	rm -rf dist/
-	rm -f coverage.out coverage.html
+	rm -rf coverage/
 
 # Development: run with live reload (requires air)
 dev:
