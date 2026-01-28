@@ -12,8 +12,9 @@ RUN tdnf install -y shadow-utils && \
     useradd -u 1000 -g azswitch -d /home/azswitch -s /bin/sh -m azswitch && \
     tdnf clean all
 
-# Copy pre-built binary from GoReleaser
-COPY azswitch /usr/local/bin/azswitch
+# Copy pre-built binary from GoReleaser (dockers_v2 places binaries in $TARGETPLATFORM/)
+ARG TARGETPLATFORM
+COPY ${TARGETPLATFORM}/azswitch /usr/local/bin/azswitch
 
 # Set up Azure CLI cache directory with proper ownership
 RUN mkdir -p /home/azswitch/.azure && \
