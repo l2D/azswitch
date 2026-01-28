@@ -442,7 +442,10 @@ func (m Model) renderTenants() string {
 		}
 
 		s.WriteString(fmt.Sprintf("%s%s\n", cursor, name))
-		s.WriteString(fmt.Sprintf("    %s\n", MutedStyle.Render(tenant.TenantID)))
+		// Only show TenantID on second line if name is not already the TenantID
+		if tenant.DisplayName != "" || tenant.DefaultDomain != "" {
+			s.WriteString(fmt.Sprintf("    %s\n", MutedStyle.Render(tenant.TenantID)))
+		}
 	}
 
 	return s.String()

@@ -68,7 +68,10 @@ func (t Tenant) Title() string {
 	if t.DisplayName != "" {
 		return t.DisplayName
 	}
-	return t.DefaultDomain
+	if t.DefaultDomain != "" {
+		return t.DefaultDomain
+	}
+	return t.TenantID
 }
 
 // Description returns a description for the tenant.
@@ -81,5 +84,8 @@ func (t Tenant) FilterValue() string {
 	if t.DisplayName != "" {
 		return t.DisplayName
 	}
-	return t.DefaultDomain
+	if t.DefaultDomain != "" {
+		return t.DefaultDomain
+	}
+	return t.TenantID
 }
