@@ -30,10 +30,12 @@ builds:
 archives:
   - id: default
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-    format: tar.gz
+    formats:
+      - tar.gz
     format_overrides:
       - goos: windows
-        format: zip
+        formats:
+          - zip
     files:
       - LICENSE
       - README.md
@@ -42,7 +44,7 @@ checksum:
   name_template: 'checksums.txt'
 
 snapshot:
-  name_template: '{{ incpatch .Version }}-next'
+  version_template: '{{ incpatch .Version }}-next'
 
 changelog:
   sort: desc
@@ -86,42 +88,19 @@ release:
     go install github.com/l2D/azswitch/cmd/azswitch@{{ .Tag }}
     ```
 
-dockers:
-  - image_templates:
-      - 'ghcr.io/l2d/azswitch:{{ .Tag }}-amd64'
-    dockerfile: Dockerfile
-    use: buildx
-    build_flag_templates:
-      - '--pull'
-      - '--platform=linux/amd64'
-      - '--label=org.opencontainers.image.created={{.Date}}'
-      - '--label=org.opencontainers.image.title={{.ProjectName}}'
-      - '--label=org.opencontainers.image.revision={{.FullCommit}}'
-      - '--label=org.opencontainers.image.version={{.Version}}'
-      - '--label=org.opencontainers.image.source={{.GitURL}}'
-    goarch: amd64
-
-  - image_templates:
-      - 'ghcr.io/l2d/azswitch:{{ .Tag }}-arm64'
-    dockerfile: Dockerfile
-    use: buildx
-    build_flag_templates:
-      - '--pull'
-      - '--platform=linux/arm64'
-      - '--label=org.opencontainers.image.created={{.Date}}'
-      - '--label=org.opencontainers.image.title={{.ProjectName}}'
-      - '--label=org.opencontainers.image.revision={{.FullCommit}}'
-      - '--label=org.opencontainers.image.version={{.Version}}'
-      - '--label=org.opencontainers.image.source={{.GitURL}}'
-    goarch: arm64
-
-docker_manifests:
-  - name_template: 'ghcr.io/l2d/azswitch:{{ .Tag }}'
-    image_templates:
-      - 'ghcr.io/l2d/azswitch:{{ .Tag }}-amd64'
-      - 'ghcr.io/l2d/azswitch:{{ .Tag }}-arm64'
-
-  - name_template: 'ghcr.io/l2d/azswitch:latest'
-    image_templates:
-      - 'ghcr.io/l2d/azswitch:{{ .Tag }}-amd64'
-      - 'ghcr.io/l2d/azswitch:{{ .Tag }}-arm64'
+dockers_v2:
+  - images:
+      - 'ghcr.io/l2d/azswitch'
+    dockerfile: Dockerfile.goreleaser
+    tags:
+      - '{{ .Tag }}'
+      - '{{ if not .IsNightly }}latest{{ end }}'
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    labels:
+      'org.opencontainers.image.created': '{{.Date}}'
+      'org.opencontainers.image.title': '{{.ProjectName}}'
+      'org.opencontainers.image.revision': '{{.FullCommit}}'
+      'org.opencontainers.image.version': '{{.Version}}'
+      'org.opencontainers.image.source': '{{.GitURL}}'
