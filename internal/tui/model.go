@@ -172,8 +172,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.subscriptions = msg.subscriptions
 		m.tenants = msg.tenants
 		// Set cursor to current subscription
-		for i, sub := range m.subscriptions {
-			if sub.IsDefault {
+		for i := range m.subscriptions {
+			if m.subscriptions[i].IsDefault {
 				m.cursor = i
 				break
 			}
@@ -394,18 +394,20 @@ func (m Model) renderSubscriptions() string {
 	var s strings.Builder
 	s.WriteString("\n")
 
-	for i, sub := range m.subscriptions {
+	for i := range m.subscriptions {
+		sub := &m.subscriptions[i]
 		cursor := "  "
 		if i == m.cursor {
 			cursor = CursorStyle.Render("> ")
 		}
 
 		name := sub.Name
-		if sub.IsDefault {
+		switch {
+		case sub.IsDefault:
 			name = CurrentStyle.Render(name + " ✓")
-		} else if i == m.cursor {
+		case i == m.cursor:
 			name = SelectedStyle.Render(name)
-		} else {
+		default:
 			name = NormalStyle.Render(name)
 		}
 
@@ -434,7 +436,8 @@ func (m Model) renderDirectories() string {
 	s.WriteString(WarningStyle.Render("  ⚠ Switching directories will open browser for re-authentication"))
 	s.WriteString("\n\n")
 
-	for i, tenant := range m.tenants {
+	for i := range m.tenants {
+		tenant := &m.tenants[i]
 		cursor := "  "
 		if i == m.tenantCursor {
 			cursor = CursorStyle.Render("> ")
@@ -443,11 +446,12 @@ func (m Model) renderDirectories() string {
 		name := tenant.Title()
 		isCurrent := m.account != nil && tenant.TenantID == m.account.TenantID
 
-		if isCurrent {
+		switch {
+		case isCurrent:
 			name = CurrentStyle.Render(name + " ✓")
-		} else if i == m.tenantCursor {
+		case i == m.tenantCursor:
 			name = SelectedStyle.Render(name)
-		} else {
+		default:
 			name = NormalStyle.Render(name)
 		}
 
