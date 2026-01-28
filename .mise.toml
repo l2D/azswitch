@@ -1,0 +1,7 @@
+[tools]
+act = "0.2.84"
+actionlint = "1.7.10"
+azure-cli = "2.82.0"
+go = "1.25.6"
+golangci-lint = "2.8.0"
+yamlfmt = "0.21.0"
