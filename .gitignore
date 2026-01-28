@@ -1,0 +1,29 @@
+# Build output
+/bin/
+/dist/
+
+# Test binary
+*.test
+
+# Coverage reports
+/coverage/
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug
+debug.log
