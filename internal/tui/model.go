@@ -18,7 +18,7 @@ type ViewType int
 
 const (
 	ViewSubscriptions ViewType = iota
-	ViewTenants
+	ViewDirectories
 )
 
 // State represents the application state.
@@ -213,7 +213,7 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	case key.Matches(msg, m.keys.Tab):
 		if m.view == ViewSubscriptions {
-			m.view = ViewTenants
+			m.view = ViewDirectories
 		} else {
 			m.view = ViewSubscriptions
 		}
@@ -267,7 +267,7 @@ func (m Model) handleSelect() (tea.Model, tea.Cmd) {
 			m.spinner.Tick,
 			m.switchSubscription(sub.ID),
 		)
-	} else if m.view == ViewTenants && len(m.tenants) > 0 {
+	} else if m.view == ViewDirectories && len(m.tenants) > 0 {
 		tenant := m.tenants[m.tenantCursor]
 		m.state = StateSwitching
 		return m, tea.Batch(
@@ -326,7 +326,7 @@ func (m Model) View() string {
 		if m.view == ViewSubscriptions {
 			s.WriteString(m.renderSubscriptions())
 		} else {
-			s.WriteString(m.renderTenants())
+			s.WriteString(m.renderDirectories())
 		}
 	}
 
@@ -356,17 +356,17 @@ func (m Model) renderHeader() string {
 // renderTabs renders the tab bar.
 func (m Model) renderTabs() string {
 	subsTab := "Subscriptions"
-	tenantsTab := "Tenants"
+	dirsTab := "Directories"
 
 	if m.view == ViewSubscriptions {
 		subsTab = ActiveTabStyle.Render(subsTab)
-		tenantsTab = InactiveTabStyle.Render(tenantsTab)
+		dirsTab = InactiveTabStyle.Render(dirsTab)
 	} else {
 		subsTab = InactiveTabStyle.Render(subsTab)
-		tenantsTab = ActiveTabStyle.Render(tenantsTab)
+		dirsTab = ActiveTabStyle.Render(dirsTab)
 	}
 
-	return fmt.Sprintf("  %s  |  %s", subsTab, tenantsTab)
+	return fmt.Sprintf("  %s  |  %s", subsTab, dirsTab)
 }
 
 // renderLoading renders the loading state.
@@ -415,14 +415,23 @@ func (m Model) renderSubscriptions() string {
 	return s.String()
 }
 
-// renderTenants renders the tenants list.
-func (m Model) renderTenants() string {
+// renderDirectories renders the directories (tenants) list with their subscriptions.
+func (m Model) renderDirectories() string {
 	if len(m.tenants) == 0 {
-		return MutedStyle.Render("\n  No tenants found")
+		return MutedStyle.Render("\n  No directories found")
+	}
+
+	// Group subscriptions by tenant ID
+	subsByTenant := make(map[string][]azure.Subscription)
+	for i := range m.subscriptions {
+		sub := &m.subscriptions[i]
+		subsByTenant[sub.TenantID] = append(subsByTenant[sub.TenantID], *sub)
 	}
 
 	var s strings.Builder
 	s.WriteString("\n")
+	s.WriteString(WarningStyle.Render("  ⚠ Switching directories will open browser for re-authentication"))
+	s.WriteString("\n\n")
 
 	for i, tenant := range m.tenants {
 		cursor := "  "
@@ -442,9 +451,20 @@ func (m Model) renderTenants() string {
 		}
 
 		s.WriteString(fmt.Sprintf("%s%s\n", cursor, name))
-		// Only show TenantID on second line if name is not already the TenantID
-		if tenant.DisplayName != "" || tenant.DefaultDomain != "" {
-			s.WriteString(fmt.Sprintf("    %s\n", MutedStyle.Render(tenant.TenantID)))
+
+		// Show subscriptions for this directory
+		if subs, ok := subsByTenant[tenant.TenantID]; ok && len(subs) > 0 {
+			for j := range subs {
+				subName := subs[j].Name
+				if subs[j].IsDefault {
+					subName = CurrentStyle.Render("• " + subName)
+				} else {
+					subName = MutedStyle.Render("• " + subName)
+				}
+				s.WriteString(fmt.Sprintf("    %s\n", subName))
+			}
+		} else {
+			s.WriteString(fmt.Sprintf("    %s\n", MutedStyle.Render("(no subscriptions)")))
 		}
 	}
 

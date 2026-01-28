@@ -48,6 +48,11 @@ var (
 			Foreground(errorColor).
 			Bold(true)
 
+	// Warning style.
+	WarningStyle = lipgloss.NewStyle().
+			Foreground(secondaryColor).
+			Italic(true)
+
 	// Success style.
 	SuccessStyle = lipgloss.NewStyle().
 			Foreground(successColor)

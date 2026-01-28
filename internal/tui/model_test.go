@@ -107,8 +107,8 @@ func TestModel_Update_TabSwitch(t *testing.T) {
 	newModel, _ := model.Update(msg)
 	m := newModel.(Model)
 
-	if m.view != ViewTenants {
-		t.Errorf("expected view to be ViewTenants after tab, got %v", m.view)
+	if m.view != ViewDirectories {
+		t.Errorf("expected view to be ViewDirectories after tab, got %v", m.view)
 	}
 
 	// Press tab again
