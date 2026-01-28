@@ -29,8 +29,8 @@ type MockClient struct {
 
 	// Calls tracks function call history.
 	Calls struct {
-		CheckCLI        int
-		CheckLogin      int
+		CheckCLI          int
+		CheckLogin        int
 		GetCurrentAccount int
 		ListSubscriptions int
 		ListTenants       int
