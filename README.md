@@ -33,7 +33,40 @@ Download the latest release from [GitHub Releases](https://github.com/l2D/azswit
 ### Docker
 
 ```bash
-docker run --rm -it -v ~/.azure:/root/.azure ghcr.io/l2d/azswitch
+docker pull ghcr.io/l2d/azswitch
+```
+
+#### Running with existing Azure credentials
+
+Mount your local Azure CLI configuration:
+
+```bash
+docker run --rm -it -v ~/.azure:/home/azswitch/.azure ghcr.io/l2d/azswitch
+```
+
+#### Running with CLI flags
+
+```bash
+# Show current account
+docker run --rm -v ~/.azure:/home/azswitch/.azure ghcr.io/l2d/azswitch --current
+
+# List subscriptions
+docker run --rm -v ~/.azure:/home/azswitch/.azure ghcr.io/l2d/azswitch --list
+```
+
+#### Interactive shell with Azure CLI
+
+To access the container shell with Azure CLI:
+
+```bash
+docker run --rm -it -v ~/.azure:/home/azswitch/.azure --entrypoint /bin/sh ghcr.io/l2d/azswitch
+```
+
+#### Building locally
+
+```bash
+docker build -t azswitch .
+docker run --rm -it -v ~/.azure:/home/azswitch/.azure azswitch
 ```
 
 ## Prerequisites

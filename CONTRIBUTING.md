@@ -15,19 +15,26 @@ Thank you for your interest in contributing to azswitch! This document provides 
 
 1. Fork the repository
 2. Clone your fork:
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/azswitch.git
    cd azswitch
    ```
+
 3. Install dependencies:
+
    ```bash
    go mod download
    ```
+
 4. Build:
+
    ```bash
    make build
    ```
+
 5. Run tests:
+
    ```bash
    make test
    ```
@@ -53,7 +60,8 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 - `chore:` - Maintenance tasks
 
 Example:
-```
+
+```sh
 feat(tui): add search filtering for subscriptions
 
 - Add fuzzy search to subscription list
@@ -70,7 +78,7 @@ feat(tui): add search filtering for subscriptions
 
 ## Project Structure
 
-```
+```sh
 azswitch/
 ├── cmd/azswitch/       # Application entry point
 ├── internal/
